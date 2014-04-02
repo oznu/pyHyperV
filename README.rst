@@ -54,7 +54,7 @@ Execute Runbook
          '32725695-0b25-47e0-abbe-b28e22eca8ad' : 'value',
     }
     
-    print o.Execute(runbookID, runbookParamaters)
+    o.Execute(runbookID, runbookParamaters)
     
     
     
