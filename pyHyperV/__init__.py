@@ -1,4 +1,4 @@
-import requests
+import requests, xmltodict
 from requests_ntlm import HttpNtlmAuth
 
 class orchestrator(object):
@@ -6,13 +6,60 @@ class orchestrator(object):
         self.host = host
         self.user = user
         self.password = password
+        self.session = requests.session()
+        self.session.auth = HttpNtlmAuth(self.user,self.password)
         
-    def Execute(self, runbook_id, params):
+    def Execute(self, runbook_id, params, dictionary=False):
         headers = {'Content-Type': 'application/atom+xml'}
-        r = requests.post(self.host, data=self.Build(runbook_id, params), headers=headers, auth=HttpNtlmAuth(self.user,self.password))
-        print r.text
+        data = self.Build(runbook_id, params, dictionary=dictionary)
+        try: 
+            if data['status'] == 400: return data
+        except: pass
+        r = self.session.post(self.host + "/Jobs", data=data, headers=headers)
+        output, output['result'] = {}, {}
+        doc = xmltodict.parse(r.text)
+        output['status'] = r.status_code
+        if r.status_code == 400: 
+            try: output['result']['message'] = doc['error']['message']['#text']
+            except: pass
+        if r.status_code == 401: output['result']['message'] = "Authorization Required"
+        if r.status_code == 201:
+            properties = doc['entry']['content']['m:properties']
+            output['result']['id'] =  properties['d:Id']['#text']
+            output['result']['status'] = properties['d:Status']
+            output['result']['CreationTime'] = properties['d:CreationTime']['#text']
+            output['result']['LastModifiedTime'] = properties['d:LastModifiedTime']['#text']
+        return output            
 
-    def Build(self, runbook_id, params):
+    def GetJobStatus(self, job_id):
+        r = self.session.get(self.host + "/Jobs(guid'%s')" % job_id)
+        output, output['result'] = {}, {}
+        doc = xmltodict.parse(r.text)
+        output['status'] = r.status_code
+        if r.status_code == 401: output['result']['message'] = "Authorization Required"
+        if r.status_code == 400:
+            output['result']['message'] = doc['error']['message']['#text']
+        properties = doc['entry']['content']['m:properties']
+        output['result']['id'] =  properties['d:Id']['#text']
+        output['result']['status'] = properties['d:Status']
+        output['result']['CreationTime'] = properties['d:CreationTime']['#text']
+        output['result']['LastModifiedTime'] = properties['d:LastModifiedTime']['#text']
+        return output               
+
+    def GetParameters(self, runbook_id):
+        r = self.session.get(self.host + "/Runbooks(guid'%s')/Parameters" % runbook_id)
+        output, output['result'] = {}, {}
+        doc = xmltodict.parse(r.text)
+        output['status'] = r.status_code
+        if r.status_code == 401: output['result']['message'] = "Authorization Required"
+        if r.status_code == 400: 
+            output['result']['message'] = doc['error']['message']['#text']
+        if r.status_code != 200: return output
+        for e in doc['feed']['entry']:
+            output['result'][str(e['title']['#text'])] = e['content']['m:properties']['d:Id']['#text']
+        return output
+
+    def Build(self, runbook_id, params, dictionary=False):
         BASE = """<?xml version="1.0" encoding="utf-8" standalone="yes"?>
                  <entry xmlns:d="http://schemas.microsoft.com/ado/2007/08/dataservices" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" xmlns="http://www.w3.org/2005/Atom">
                  <content type="application/xml">
@@ -25,8 +72,19 @@ class orchestrator(object):
                  </content>
                  </entry>"""
         settings_array = []
-        for setting_var in params:
-            setting_val = '<Parameter><ID>{%s}</ID><Value>%s</Value></Parameter>' % (setting_var, params[setting_var])
-            settings_array.append(setting_val)
+        if dictionary == False:
+            for setting_var in params:
+                setting_val = '<Parameter><ID>{%s}</ID><Value>%s</Value></Parameter>' % (setting_var, params[setting_var])
+                settings_array.append(setting_val)
+        if dictionary == True:
+            dict = self.GetParameters(runbook_id)
+            if dict['status'] != 200: return dict
+            for setting_var in params:
+                try:
+                    setting_val = '<Parameter><ID>{%s}</ID><Value>%s</Value></Parameter>' % (dict['result'][setting_var], params[setting_var])
+                    settings_array.append(setting_val)
+                except:
+                    output, output['status'],output['message'] = {}, 400, "Object '%s' does not exist in runbook {%s}" % (setting_var, runbook_id)
+                    return output
         params = ('').join(settings_array)
         return BASE % (runbook_id, params)

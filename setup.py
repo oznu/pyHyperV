@@ -12,6 +12,7 @@ setup(
     long_description=open('README.rst').read(),
     install_requires=[
         "requests >= 2.0.0",
-        "requests_ntlm"
+        "requests_ntlm",
+        "xmltodict"
     ],
 )
