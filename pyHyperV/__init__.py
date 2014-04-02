@@ -46,6 +46,32 @@ class orchestrator(object):
         output['result']['LastModifiedTime'] = properties['d:LastModifiedTime']['#text']
         return output               
 
+    def GetRunbooks(self):
+        r = self.session.get(self.host + "/Runbooks")
+        output, output['result'] = {}, {}
+        doc = xmltodict.parse(r.text)
+        output['status'] = r.status_code
+        if r.status_code == 401: output['result']['message'] = "Authorization Required"
+        if r.status_code == 400:
+            output['result']['message'] = doc['error']['message']['#text']
+        if r.status_code != 200: return output
+        for e in doc['feed']['entry']:
+            output['result'][str(e['title']['#text'])] = e['content']['m:properties']['d:Id']['#text']
+        return output
+
+    def GetRunbookID(self, runbook_name):
+        dict = self.GetRunbooks()
+        if dict['status'] != 200: return dict
+        output, output['result'] = {}, {}
+        if runbook_name not in dict['result']:
+            output['status'] = 400
+            output['message'] = "Runbook ID could not be found for %s" % runbook_name
+            return output
+        output['status'] = 200
+        output['result']['id'] =  dict['result'][runbook_name]
+        output['result']['name'] = runbook_name
+        return output
+
     def GetParameters(self, runbook_id):
         r = self.session.get(self.host + "/Runbooks(guid'%s')/Parameters" % runbook_id)
         output, output['result'] = {}, {}
