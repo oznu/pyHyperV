@@ -109,6 +109,44 @@ Example Response:
     }
     
     
+============
+Get Runbooks
+============
+
+.. code:: python
+
+    pyHyperV.orchestrator.GetRunbooks()
+    pyHyperV.orchestrator.GetRunbookID(runbookName)
+    
+Returns a list of runbooks and their IDs from orchestrator.
+
+Example:
+
+.. code:: python
+    
+    o.GetRunbooks()
+    
+    { 
+    'status' : 200,
+    'result' : {
+        'Runbook_1' : 'e5944fe0-b600-45d2-a872-0c256594e394'
+        'Runbook_2' : 'fd6d6a4b-1e57-40a3-930a-f4eb56394d3f'
+        'Runbook_3' : '31451e20-5829-4323-9661-603ff826c852'
+        }
+    }
+    
+
+It is also possible to return a single runbook ID by it's name:
+
+.. code:: python
+
+    o.GetRunbookID('Runbook_1')
+    
+    'e5944fe0-b600-45d2-a872-0c256594e394'
+    
+         
+
+
 ======================
 Get Runbook Parameters
 ======================
@@ -173,4 +211,56 @@ Example Response:
           'CreationTime'     : '2014-04-02T12:11:05.617',
           'LastModifiedTime' : '2014-04-02T12:19:08.963',
           }
+    }
+    
+===================
+Get Job Instance ID
+===================
+
+.. code:: python
+
+    pyHyperV.orchestrator.GetJobInstance(jobID)
+    
+Returns the job instance ID. This ID can then be used in other functions such as GetInstanceParameters.
+
+Example:
+
+.. code:: python
+
+    jobID = '3c87fd6c-69f5-41c9-bd55-ec2aa6ec7c64'
+
+    o.GetJobInstance(jobID)
+    
+    'f4ac97ed-495b-44ae-b547-64611b0d8075'
+    
+
+=======================
+Get Instance Parameters
+=======================
+
+.. code:: python
+
+    pyHyperV.orchestrator.GetInstanceParameters(instanceID)
+    
+    
+Returns the instance parameters from orchestrator. This function can be used to get data returned from orchestrator.
+
+Example:
+
+.. code:: python
+
+    instanceID = 'f4ac97ed-495b-44ae-b547-64611b0d8075'
+
+    o.GetInstanceParameters(instanceID)
+    
+    {
+    'status' : 200,
+    'result' : {
+        'HDD'  : '50gb',
+        'CPU'  : '2',
+        'RAM'  : '2048',
+        'OS'   : 'Server2012',
+        'VM_ID' : 'edb8d27d-38ad-4d29-a255-30d8360a3852',
+        'VM_IP' : '127.0.0.1',
+        }
     }
