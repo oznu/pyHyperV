@@ -2,7 +2,7 @@ from distutils.core import setup
 
 setup(
     name='pyHyperV',
-    version='0.0.2',
+    version='0.0.3',
     author='oznu',
     author_email='dev@oz.nu',
     packages=['pyHyperV'],
