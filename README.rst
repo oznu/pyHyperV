@@ -256,10 +256,10 @@ Example:
     {
     'status' : 200,
     'result' : {
-        'HDD'  : '50gb',
-        'CPU'  : '2',
-        'RAM'  : '2048',
-        'OS'   : 'Server2012',
+        'HDD'   : '50gb',
+        'CPU'   : '2',
+        'RAM'   : '2048',
+        'OS'    : 'Server2012',
         'VM_ID' : 'edb8d27d-38ad-4d29-a255-30d8360a3852',
         'VM_IP' : '127.0.0.1',
         }
