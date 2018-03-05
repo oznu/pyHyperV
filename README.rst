@@ -2,10 +2,10 @@ pyHyperV
 ========
 
 
-.. image:: https://pypip.in/v/pyHyperV/badge.png
+.. image:: https://img.shields.io/pypi/v/pyHyperV.svg
         :target: https://crate.io/packages/pyHyperV
 
-.. image:: https://pypip.in/d/pyHyperV/badge.png
+.. image:: https://img.shields.io/pypi/dm/pyHyperV.svg
         :target: https://crate.io/packages/pyHyperV
 
 Simple client for calling HyperV orchestrator runbooks in python.
