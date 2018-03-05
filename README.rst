@@ -5,9 +5,6 @@ pyHyperV
 .. image:: https://img.shields.io/pypi/v/pyHyperV.svg
         :target: https://pypi.python.org/pypi/pyHyperV/0.0.4
 
-.. image:: https://img.shields.io/pypi/dm/pyHyperV.svg
-        :target: https://pypi.python.org/pypi/pyHyperV/0.0.4
-
 Simple client for calling HyperV orchestrator runbooks in python.
 
 .. contents::
